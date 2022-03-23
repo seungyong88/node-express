@@ -19,11 +19,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // application/json 형태 
 app.use(bodyParser.json());
+app.use(cookieParser());
 
 app.get('/', (req, res) => {
   res.send('Hello World!')
 })
-
 
 app.get('/api/hello', (req, res) => {
   res.send("hello");
@@ -55,7 +55,6 @@ app.post('/api/users/login', (req, res) => {
     }
 
     // 요청된 이메일이 데이터 베이스에 있다면 비밀번호가 맞는 비밀번호 인지 확인한다.
-    // console.log("req.body.password", req.body.password);
     user.comparePassword(req.body.password, (err, isMatch) => {
       if (!isMatch) {
         return res.json({ loginSuccess: false, message: "비밀번호가 틀렸습니다." });
@@ -66,8 +65,9 @@ app.post('/api/users/login', (req, res) => {
         if (err) return res.status(400).send(err);
 
         // 토큰을 저장한다. 쿠키,  로컬스토리지
-        // console.log("user.token", user.token);
-        res.cookie("x_auth", user.token).status(200).send({ loginSuccess: true, userId: user._id })
+        res.cookie("x_auth", user.token)
+        .status(200)
+        .send({ loginSuccess: true, userId: user._id })
       })
     })
   })
@@ -75,7 +75,7 @@ app.post('/api/users/login', (req, res) => {
 
 app.get('/api/users/auth', auth, (req, res) => {
  // 여기 까지 미들웨어를 통과해 왔다는 얘기는 Authentication이 True 라는 말.
-  res.send(200).json({
+  res.status(200).json({
     _id: req.user._id,
     isAdmin: req.user.role === 0 ? false : true,
     isAuth: true,

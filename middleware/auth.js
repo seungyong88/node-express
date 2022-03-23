@@ -6,9 +6,7 @@ let auth = (req, res, next) => {
   // 클리언트에서 쿠키를 가져온다.
 
   let token = req.cookies.x_auth;
-  console.log("ddd", token);
   // 토큰을 복호화 한 후 유저를 찾는다.
-
 
   User.findByToken(token, (err, user) => {
     if(err) throw err;

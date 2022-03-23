@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const res = require('express/lib/response');
 const saltRounds = 10;
 
 const userSchema = mongoose.Schema({
@@ -39,8 +38,8 @@ userSchema.pre('save', function (next) {
   var user = this;
   // 비밀번호를 암호화 시킨다.
 
-  // if(user.isModified('password')) {
-    bcrypt.genSalt(saltRounds,  function (err, salt) {
+  if(user.isModified('password')) {
+    bcrypt.genSalt(saltRounds, function (err, salt) {
       if(err) return next(err)
   
       bcrypt.hash(user.password, salt, function (err, hash) {
@@ -51,16 +50,15 @@ userSchema.pre('save', function (next) {
         next();
       })
     })
-  // }
-  
+  } else {
+    next();
+  }  
 })
 
 
 userSchema.methods.comparePassword = function(plainPassword, cb) {
   // plain password 12345 암호화된 비밀번호
-  console.log("plainPassword, this.password", plainPassword, this.password);
   bcrypt.compare(plainPassword, this.password, function (err, isMatch) {
-    console.log("isMatch", isMatch);
     if(err) return cb(err);
     cb(null, isMatch);
   })
@@ -83,7 +81,7 @@ userSchema.methods.generateToken = function(cb) {
 }
 
 
-userSchema.methods.findByToken = function(token, cb) {
+userSchema.statics.findByToken = function(token, cb) {
   var user = this;
 
   // 토큰을 decode 한다.
@@ -95,10 +93,7 @@ userSchema.methods.findByToken = function(token, cb) {
       cb(null, user);
     })
   });
-
-
 }
-
 
 const User = mongoose.model('User', userSchema);
 
