@@ -77,9 +77,7 @@ userSchema.methods.generateToken = function(cb) {
     if(err) return cb(err)
     cb(null, user);
   })
-
 }
-
 
 userSchema.statics.findByToken = function(token, cb) {
   var user = this;
